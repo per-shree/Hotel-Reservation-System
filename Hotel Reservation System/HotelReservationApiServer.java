@@ -30,6 +30,10 @@ public class HotelReservationApiServer {
             System.out.println("MySQL Driver not found: " + e.getMessage());
         }
 
+        // Log connection info (masking password)
+        System.out.println("Attempting to connect to DB: " + url);
+        System.out.println("Using DB User: " + username);
+
         // Ensure all tables exist on startup
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement stmt = conn.createStatement()) {
