@@ -325,7 +325,11 @@ public class HotelReservationApiServer {
         public void handle(HttpExchange exchange) throws IOException {
             String path = exchange.getRequestURI().getPath();
             if (path.equals("/")) path = "/index.html";
-            String filePath = "../web" + path;
+            
+            // Look for the web folder in the current directory or parent
+            String basePath = new java.io.File("web").exists() ? "web" : "../web";
+            String filePath = basePath + path;
+            
             try {
                 byte[] response = Files.readAllBytes(Paths.get(filePath));
                 if (path.endsWith(".html")) exchange.getResponseHeaders().set("Content-Type", "text/html");
