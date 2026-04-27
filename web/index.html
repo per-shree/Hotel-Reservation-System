@@ -555,13 +555,26 @@ if (!localStorage.getItem('authToken')) {
     </div>
 </div>
 
+<script src="config.js"></script>
 <script>
-    // Auth helper - adds token to all API requests
+    // Authentication Helper
     function authFetch(url, options = {}) {
         const token = localStorage.getItem('authToken');
-        if (!options.headers) options.headers = {};
-        if (token) options.headers['Authorization'] = 'Bearer ' + token;
-        return fetch(url, options);
+        const baseUrl = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : '';
+        const fullUrl = url.startsWith('http') ? url : baseUrl + url;
+
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        return fetch(fullUrl, { ...options, headers }).then(res => {
+            if (res.status === 401 && !url.includes('/api/auth/')) {
+                window.location.href = 'auth.html';
+            }
+            return res;
+        });
     }
 
     function openModal() {
@@ -730,20 +743,29 @@ if (!localStorage.getItem('authToken')) {
     }
 
     function loadReports() {
-        const tbody = document.getElementById('reports-table-body');
-        tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-400">Loading reports...</td></tr>';
-        authFetch('/api/reports').then(r=>r.json()).then(data=>{
-            tbody.innerHTML = '';
-            data.forEach(r => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-white/5 transition-colors group">
-                        <td class="px-8 py-6 font-semibold">${r.roomType}</td>
-                        <td class="px-8 py-6">${r.bookings}</td>
-                        <td class="px-8 py-6 text-right">₹${r.revenue.toFixed(2)}</td>
+        authFetch('/api/reports')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('reports-table-body');
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-400">No data available for reports.</td></tr>';
+                    return;
+                }
+                data.forEach(report => {
+                    tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-8 py-4 font-semibold">${report.roomType}</td>
+                        <td class="px-8 py-4">${report.totalBookings}</td>
+                        <td class="px-8 py-4 text-right text-secondary font-mono">₹${report.totalRevenue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                     </tr>
-                `;
+                    `;
+                });
+            })
+            .catch(err => {
+                document.getElementById('reports-table-body').innerHTML = 
+                    '<tr><td colspan="3" class="p-8 text-center text-red-400">Failed to load reports.</td></tr>';
             });
-        });
     }
 
     function loadProfile() {

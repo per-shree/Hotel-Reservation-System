@@ -30,9 +30,11 @@ public class HotelReservationApiServer {
             System.out.println("MySQL Driver not found: " + e.getMessage());
         }
 
-        // Ensure managers table exists on startup
+        // Ensure all tables exist on startup
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement stmt = conn.createStatement()) {
+            
+            // 1. Managers Table
             stmt.executeUpdate(
                 "CREATE TABLE IF NOT EXISTS managers (" +
                 "  manager_id INT AUTO_INCREMENT PRIMARY KEY," +
@@ -45,16 +47,33 @@ public class HotelReservationApiServer {
                 "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ")"
             );
-            System.out.println("Managers table verified.");
-            // Ensure manager_id and check_in_date columns exist in reservations
-            try {
-                stmt.executeUpdate("ALTER TABLE reservations ADD COLUMN manager_id INT DEFAULT NULL");
-                System.out.println("Added manager_id column to reservations.");
-            } catch (SQLException ignore) { /* column already exists */ }
-            try {
-                stmt.executeUpdate("ALTER TABLE reservations ADD COLUMN check_in_date DATE DEFAULT NULL");
-                System.out.println("Added check_in_date column to reservations.");
-            } catch (SQLException ignore) { /* column already exists */ }
+
+            // 2. Rooms Table
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS rooms (" +
+                "  room_number INT PRIMARY KEY," +
+                "  room_type VARCHAR(50)," +
+                "  price DOUBLE," +
+                "  is_available BOOLEAN DEFAULT TRUE" +
+                ")"
+            );
+
+            // 3. Reservations Table
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS reservations (" +
+                "  reservation_id INT AUTO_INCREMENT PRIMARY KEY," +
+                "  guest_name VARCHAR(255)," +
+                "  room_number INT," +
+                "  contact_number VARCHAR(20)," +
+                "  nights INT," +
+                "  total_price DOUBLE," +
+                "  reservation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "  manager_id INT," +
+                "  check_in_date DATE" +
+                ")"
+            );
+
+            System.out.println("Database tables verified and ready.");
         } catch (SQLException e) {
             System.out.println("Warning: Could not verify tables: " + e.getMessage());
         }
@@ -538,29 +557,35 @@ public class HotelReservationApiServer {
             if ("OPTIONS".equals(exchange.getRequestMethod())) { exchange.sendResponseHeaders(204, -1); return; }
 
             int managerId = getAuthenticatedManagerId(exchange);
-            String query = managerId > 0 
-                ? "SELECT r.room_type, MAX(r.price) as nightly_rate, COUNT(res.reservation_id) as bookings, SUM(IFNULL(res.total_price, 0)) as revenue FROM rooms r LEFT JOIN reservations res ON r.room_number = res.room_number AND res.manager_id = ? GROUP BY r.room_type"
-                : "SELECT r.room_type, MAX(r.price) as nightly_rate, 0 as bookings, 0 as revenue FROM rooms r GROUP BY r.room_type";
-            try (Connection conn = DriverManager.getConnection(url, username, password);
-                 PreparedStatement pst = conn.prepareStatement(query)) {
-                if (managerId > 0) pst.setInt(1, managerId);
-                ResultSet rs = pst.executeQuery();
-                StringBuilder json = new StringBuilder("[");
-                boolean first = true;
-                while (rs.next()) {
-                    if (!first) json.append(",");
-                    json.append("{");
-                    json.append("\"roomType\":\"").append(rs.getString("room_type")).append("\",");
-                    json.append("\"nightlyRate\":").append(rs.getDouble("nightly_rate")).append(",");
-                    json.append("\"bookings\":").append(rs.getInt("bookings")).append(",");
-                    json.append("\"revenue\":").append(rs.getDouble("revenue"));
-                    json.append("}");
-                    first = false;
+            if (managerId == -1) { sendJsonResponse(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+
+            try (Connection conn = DriverManager.getConnection(url, username, password)) {
+                String query = "SELECT r.room_type, COUNT(res.reservation_id) as total_bookings, IFNULL(SUM(res.total_price), 0) as total_revenue " +
+                             "FROM rooms r " +
+                             "LEFT JOIN reservations res ON r.room_number = res.room_number " +
+                             "WHERE res.manager_id = ? " +
+                             "GROUP BY r.room_type";
+                
+                try (PreparedStatement pst = conn.prepareStatement(query)) {
+                    pst.setInt(1, managerId);
+                    ResultSet rs = pst.executeQuery();
+                    StringBuilder json = new StringBuilder("[");
+                    boolean first = true;
+                    while (rs.next()) {
+                        if (!first) json.append(",");
+                        json.append("{");
+                        json.append("\"roomType\":\"").append(rs.getString("room_type")).append("\",");
+                        json.append("\"totalBookings\":").append(rs.getInt("total_bookings")).append(",");
+                        json.append("\"totalRevenue\":").append(rs.getDouble("total_revenue"));
+                        json.append("}");
+                        first = false;
+                    }
+                    json.append("]");
+                    sendJsonResponse(exchange, 200, json.toString());
                 }
-                json.append("]");
-                sendJsonResponse(exchange, 200, json.toString());
             } catch (SQLException e) {
                 e.printStackTrace();
+                sendJsonResponse(exchange, 500, "{\"error\":\"Failed to fetch reports\"}");
             }
         }
     }

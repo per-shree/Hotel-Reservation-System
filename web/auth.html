@@ -162,7 +162,8 @@ async function handleLogin(e) {
     const btn = document.getElementById('login-btn');
     btn.disabled = true; btn.textContent = 'Signing in...';
     try {
-        const res = await fetch('/api/auth/login', {
+        const baseUrl = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : '';
+        const res = await fetch(baseUrl + '/api/auth/login', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
@@ -193,7 +194,8 @@ async function handleRegister(e) {
     const btn = document.getElementById('reg-btn');
     btn.disabled = true; btn.textContent = 'Registering...';
     try {
-        const res = await fetch('/api/auth/register', {
+        const baseUrl = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : '';
+        const res = await fetch(baseUrl + '/api/auth/register', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
