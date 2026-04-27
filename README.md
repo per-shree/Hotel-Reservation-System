@@ -1,50 +1,55 @@
 # Hotel Reservation System 🏨
 
-Welcome to the Hotel Reservation System, a Java-based application for managing hotel reservations efficiently. Whether you're running a small inn or a boutique hotel, this system simplifies the reservation process, enhances guest management, and keeps your business organized.
+A premium, real-time hotel management dashboard built with **Java** and a modern **Glassmorphism Web UI**. This system is now deployment-ready with MySQL integration and advanced management features.
 
-## Features 🌟
+## 🌟 Key Features
+- **Real-time Executive Dashboard**: Monitor revenue, room availability, and recent bookings at a glance.
+- **Advanced Room Management**: Bulk update pricing, add rooms dynamically, and toggle availability.
+- **Future Date Bookings**: Integrated date-picking system for managing future guest arrivals.
+- **Multi-Tenant Authentication**: Secure manager login/registration with data isolation by hotel.
+- **Premium UX**: High-end dark mode interface with glassmorphism effects and dynamic animations.
 
-- **Reserve a Room:** Easily make new reservations by providing guest details, room numbers, and contact information.
+## 🚀 Deployment Guide (Fully Working MySQL)
 
-- **View Reservations:** Get an overview of all current reservations, including guest names, room numbers, contact details, and reservation dates.
+To get this project online with a functional MySQL database, I recommend using **Railway.app**.
 
-- **Edit Reservation Details:** Update guest names, room numbers, and contact information for existing reservations.
+### 1. Prepare your Project
+- Push this code to a **GitHub Repository**.
+- The project includes a `Dockerfile` for automatic cloud environment setup.
 
-- **Delete Reservations:** Remove reservations that are no longer needed.
+### 2. Setup on Railway
+1. **Login** to [Railway.app](https://railway.app/).
+2. Click **New Project** -> **Deploy from GitHub repo**.
+3. Select this repository.
+4. Add a **MySQL Database** service to your project.
 
-## Getting Started 🚀
+### 3. Environment Variables
+In your Railway dashboard, go to your **Java Service** settings -> **Variables** and add:
+- `DB_URL`: The internal connection URL from your MySQL service.
+- `DB_USER`: The MySQL username (usually `root`).
+- `DB_PASSWORD`: The MySQL password.
+- `PORT`: `8080`.
 
-### Prerequisites
+### 4. Database Sync
+The server automatically verifies and creates necessary tables (`managers`, `reservations`, etc.) on startup.
 
-- Java Development Kit (JDK)
-- MySQL Database
-- MySQL Connector/J (Java)
+---
 
-### Setup
-
-1. Clone this repository to your local machine:
-
-   ```sh
-   git clone https://github.com/prabhatthakuryt/Hotel-Reservation-System.git
-
-2. Configure your MySQL database settings in the HotelReservationSystem.java file:
+## 🛠 Local Setup
+1. **Database**: Ensure MySQL is running on `localhost:3306` (Database: `hotel_db`).
+2. **Compile**:
+   ```bash
+   cd "Hotel Reservation System"
+   javac -cp "mysql-connector-j-9.6.0.jar" HotelReservationApiServer.java
    ```
-   private static final String DB_URL = "jdbc:mysql://localhost:3306/hotel_db";
-   private static final String DB_USER = "your_username";
-   private static final String DB_PASSWORD = "your_password";
+3. **Run**:
+   ```bash
+   java -cp ".;mysql-connector-j-9.6.0.jar" HotelReservationApiServer
+   ```
+4. **Access**: Open `http://localhost:8080` in your browser.
 
-3. Compile and run the application
-4. Follow the on-screen menu options to use the system.
-
-### Usage 📋
-- Upon running the application, you'll be presented with a menu to choose your desired operation (reservation, viewing, editing, or exiting).
-
-- Follow the prompts to input reservation details, view current reservations, edit existing bookings, and more.
-
-### Contributing 🤝
-- Contributions are welcome! Feel free to open issues and pull requests for bug fixes, enhancements, or new features.
+---
 
 ### Acknowledgments 🙏
-- Special thanks to all contributors and supporters of the Hotel Reservation System project.
-
-### Happy booking! 🌆
+- Developed as a modern upgrade to the classic Java Hotel System.
+- Special thanks to the open-source community for the premium UI assets.

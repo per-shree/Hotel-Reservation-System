@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aurelia Luxe — Hotel Registration & Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:radial-gradient(circle at top left,#1a3a2a,#0f2027 40%,#081217 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#e1e3e4;overflow-y:auto}
+.bg-particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-particles div{position:absolute;border-radius:50%;background:rgba(212,175,55,0.06);animation:float 20s infinite ease-in-out}
+.bg-particles div:nth-child(1){width:300px;height:300px;top:-50px;left:-50px;animation-delay:0s}
+.bg-particles div:nth-child(2){width:200px;height:200px;bottom:10%;right:5%;animation-delay:5s}
+.bg-particles div:nth-child(3){width:150px;height:150px;top:40%;left:60%;animation-delay:10s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+.auth-container{position:relative;z-index:10;width:100%;max-width:520px;padding:40px 20px}
+.glass-card{background:rgba(255,255,255,0.03);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:48px;box-shadow:0 32px 64px rgba(0,0,0,0.4)}
+.logo-section{text-align:center;margin-bottom:36px}
+.logo-section h1{font-family:'Noto Serif',serif;font-size:28px;color:#d4af37;letter-spacing:4px;font-weight:900;text-transform:uppercase}
+.logo-section p{font-size:10px;color:#64748b;letter-spacing:4px;text-transform:uppercase;margin-top:4px}
+.logo-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#d4af37,#f2ca50);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 32px rgba(212,175,55,0.3)}
+.logo-icon span{color:#1a1a1a;font-size:28px}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;margin-bottom:32px}
+.tab-btn{flex:1;padding:12px;border:none;background:transparent;color:#64748b;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border-radius:10px;cursor:pointer;transition:all 0.3s}
+.tab-btn.active{background:rgba(212,175,55,0.15);color:#d4af37;box-shadow:0 2px 12px rgba(212,175,55,0.1)}
+.form-section{display:none;animation:fadeIn 0.4s ease}
+.form-section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.field input,.field textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px 16px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.3s}
+.field input:focus,.field textarea:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,0.1)}
+.field textarea{resize:vertical;min-height:60px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#d4af37,#e9c349);color:#1a1a1a;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-top:8px}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.3)}
+.submit-btn:active{transform:scale(0.98)}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.error-msg{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;animation:fadeIn 0.3s}
+.success-msg{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#6ee7b7;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;animation:fadeIn 0.3s}
+.divider{text-align:center;margin:24px 0;position:relative}
+.divider::before{content:'';position:absolute;left:0;top:50%;width:100%;height:1px;background:rgba(255,255,255,0.08)}
+.divider span{background:#0f1a1f;padding:0 16px;position:relative;color:#64748b;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.feature{display:flex;align-items:center;gap:8px;font-size:11px;color:#64748b}
+.feature span{color:#d4af37;font-size:16px}
+</style>
+</head>
+<body>
+<div class="bg-particles"><div></div><div></div><div></div></div>
+<div class="auth-container">
+<div class="glass-card">
+<div class="logo-section">
+<div class="logo-icon"><span class="material-symbols-outlined">hotel</span></div>
+<h1>Aurelia Luxe</h1>
+<p>Grand Resort &amp; Spa</p>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('login')">Sign In</button>
+<button class="tab-btn" onclick="showTab('register')">Register Hotel</button>
+</div>
+
+<div id="error-box" class="error-msg"></div>
+<div id="success-box" class="success-msg"></div>
+
+<!-- LOGIN -->
+<div id="login-form" class="form-section active">
+<form onsubmit="handleLogin(event)">
+<div class="field">
+<label>Email Address</label>
+<input type="email" id="login-email" placeholder="manager@hotel.com" required>
+</div>
+<div class="field">
+<label>Password</label>
+<input type="password" id="login-password" placeholder="Enter your password" required>
+</div>
+<button type="submit" class="submit-btn" id="login-btn">Sign In to Dashboard</button>
+</form>
+<div class="divider"><span>New here?</span></div>
+<div style="text-align:center">
+<button class="tab-btn" style="color:#d4af37;background:none;border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:10px 24px" onclick="showTab('register')">Register Your Hotel</button>
+</div>
+</div>
+
+<!-- REGISTER -->
+<div id="register-form" class="form-section">
+<form onsubmit="handleRegister(event)">
+<div class="field">
+<label>Hotel / Resort Name</label>
+<input type="text" id="reg-hotel" placeholder="e.g. Aurelia Grand Resort" required>
+</div>
+<div class="field">
+<label>Manager Full Name</label>
+<input type="text" id="reg-name" placeholder="e.g. Julianna Vane" required>
+</div>
+<div class="field-row">
+<div class="field">
+<label>Email</label>
+<input type="email" id="reg-email" placeholder="you@hotel.com" required>
+</div>
+<div class="field">
+<label>Phone</label>
+<input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+</div>
+</div>
+<div class="field">
+<label>Password</label>
+<input type="password" id="reg-password" placeholder="Min 6 characters" minlength="6" required>
+</div>
+<div class="field">
+<label>Hotel Address</label>
+<textarea id="reg-address" placeholder="Full address of your property"></textarea>
+</div>
+<button type="submit" class="submit-btn" id="reg-btn">Register & Start Managing</button>
+</form>
+<div class="features">
+<div class="feature"><span class="material-symbols-outlined">bed</span>Room Management</div>
+<div class="feature"><span class="material-symbols-outlined">book_online</span>Reservations</div>
+<div class="feature"><span class="material-symbols-outlined">analytics</span>Reports</div>
+<div class="feature"><span class="material-symbols-outlined">group</span>Guest Directory</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// Check if already logged in
+if (localStorage.getItem('authToken')) {
+    window.location.href = '/';
+}
+
+function showTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+    document.getElementById(tab + '-form').classList.add('active');
+    if (tab === 'login') document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    else document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    hideMessages();
+}
+
+function showError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('success-box').style.display = 'none';
+}
+function showSuccess(msg) {
+    const el = document.getElementById('success-box');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('error-box').style.display = 'none';
+}
+function hideMessages() {
+    document.getElementById('error-box').style.display = 'none';
+    document.getElementById('success-box').style.display = 'none';
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    hideMessages();
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('managerData', JSON.stringify(data.manager));
+            localStorage.setItem('profileName', data.manager.managerName);
+            localStorage.setItem('profileTitle', 'Hotel Manager');
+            showSuccess('Login successful! Redirecting...');
+            setTimeout(() => window.location.href = '/', 800);
+        } else {
+            showError(data.error || 'Invalid credentials');
+        }
+    } catch (err) {
+        showError('Connection failed. Is the server running?');
+    }
+    btn.disabled = false; btn.textContent = 'Sign In to Dashboard';
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    hideMessages();
+    const btn = document.getElementById('reg-btn');
+    btn.disabled = true; btn.textContent = 'Registering...';
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                hotelName: document.getElementById('reg-hotel').value,
+                managerName: document.getElementById('reg-name').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                phone: document.getElementById('reg-phone').value,
+                address: document.getElementById('reg-address').value
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('managerData', JSON.stringify(data.manager));
+            localStorage.setItem('profileName', data.manager.managerName);
+            localStorage.setItem('profileTitle', 'Hotel Manager');
+            showSuccess('Registration successful! Redirecting to dashboard...');
+            setTimeout(() => window.location.href = '/', 1000);
+        } else {
+            showError(data.error || 'Registration failed');
+        }
+    } catch (err) {
+        showError('Connection failed. Is the server running?');
+    }
+    btn.disabled = false; btn.textContent = 'Register & Start Managing';
+}
+</script>
+</body>
+</html>
